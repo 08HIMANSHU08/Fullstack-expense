@@ -6,8 +6,10 @@ const router = express.Router();
 
 const signupController = require('../controllers/sign');
 
+const loginController = require('../controllers/login');
 
 router.post('/signup',signupController.postSignup);
+router.post('/login',loginController.postLogin);
 
 // router.post('/add-expense',expenseController.postExpense);
 
