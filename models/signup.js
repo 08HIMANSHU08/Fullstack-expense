@@ -11,7 +11,11 @@ const SignUp = sequelize.define('signup',{
         primaryKey:true,
     },
     name:Sequelize.STRING,
-    email:Sequelize.STRING,
+    email:{
+        type:Sequelize.STRING,
+        allowNull:false,
+        unique:true,
+    },
     passward:Sequelize.STRING,
 });
 
