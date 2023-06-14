@@ -12,6 +12,9 @@ const sequelize=require('./util/database');
 
 var cors = require('cors');
 
+const SignUp = require('./models/signup');
+const Expense = require('./models/expensetable');
+
 const adminRoutes = require('./routes/admin');
 const expenseRoutes = require('./routes/expenseapp');
 const app = express();
@@ -30,6 +33,9 @@ app.use('/user',adminRoutes)
 app.use('/expense',expenseRoutes);
 
 app.use(errorController.get404)
+
+SignUp.hasMany(Expense);
+Expense.belongsTo(SignUp);
 
 sequelize.sync()
 .then(result=>{
