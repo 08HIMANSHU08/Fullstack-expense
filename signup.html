@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+    <title>Expense App</title>
+  </head>
+  <body>
+    <section class="container container-sm container-md container-lg container-xl container-xxl">
+      <div class="container h-100">
+        <div class="row h-100 justify-content-center">
+          <div class="col-10 col-md-8 col-lg-6">
+            <form id="my-form" class="form-control">
+              <div class="form-group">
+                <label for="name" class="text-danger text-center">Enter Your Name:</label>
+                <input type="text" id="name" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label for="email" class="text-danger text-center">Enter Your Email:</label>
+                <input type="email" id="email" class="form-control" required >
+              </div>
+              <div class="form-group">
+                <label for="passward" class="text-danger text-center">Enter Passward:</label>
+                <input type="password" id="passward" class="form-control" required>
+              </div>
+              <div class="d-flex justify-content-center m-2">
+                <input class="btn btn-primary btn-sm btn-outline-dark btn-c" type="submit" value="SignUp">
+                <a href="./login.html">Existing User</a>
+              </div>  
+          </form>
+          </div>
+        </div>
+      </div>
+    <!-- <section class="container container-sm container-md container-lg container-xl container-xxl">
+      <div class="container h-100">
+        <div class="row h-100 justify-content-center">
+          <div class="col-10 col-md-8 col-lg-6">
+            <form id="my-form" class="form-control">
+              <div class="form-group">
+                <label for="expense" class="text-danger text-center">Choose Expense Amount:</label>
+                <input type="number" id="expense" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="description" class="text-danger">Choose Description:</label>
+                <textarea type="textarea" id="description"class="form-control"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="category" class="text-danger">Choose a Category:</label>
+                <select id="category" class="form-control">
+                  <option value="" selected disabled >Select Category</option>
+                  <option value="Fuel">Fuel</option>
+                  <option value="Movie">Movie</option>
+                  <option value="Groceries">Groceries</option>
+                  <option value="Electricity">Electricity</option>
+                  <option value="Rent">Rent</option>
+                  <option value="Travel">Travel</option>
+                  <option value="Internet">Internet</option>
+                  <option value="Pet">Pet</option>
+                  <option value="Shopping">Shopping</option>
+                </select>
+              </div>
+              <div class="d-flex justify-content-center">
+                <input class="btn btn-primary btn-sm btn-outline-dark m-2 btn-c" type="submit" value="Add Expense">
+              </div> 
+          </form>
+          </div>
+        </div>
+      </div>
+    </br>
+      <div class="container h-100">
+        <div class="row h-100 justify-content-center">
+          <div class="col-10 col-md-8 col-lg-6">
+            <ul id="listofexpense" class="list-group">
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+      <script>
+        const myForm = document.querySelector('#my-form');
+        const nameInput = document.querySelector('#name');
+        const emailInput = document.querySelector('#email');
+        const passwardInput = document.querySelector('#passward');
+
+        myForm.addEventListener('submit', onSubmit);
+           
+        function onSubmit(e){
+          e.preventDefault();       
+          const li = document.createElement('li');
+          const myname=nameInput.value;
+          const myemail=emailInput.value;
+          const mypassward=passwardInput.value;
+          const inputData={
+            myname,
+            myemail,
+            mypassward,
+          };
+          console.log(inputData);
+          axios.post("http://localhost:3000/user/signup",inputData)
+            .then((response)=>{
+              console.log(response)
+              if(response.request.status==201){
+                window.location.href="./login.html";
+              }
+            })
+            .catch((err)=>{
+              document.body.innerHTML+=`<div style="color:red;">${err.response.data.error}<div>`;
+              console.log(err);
+            })
+            nameInput.value = '';
+            emailInput.value='';
+            passwardInput.value = '';  
+        }
+       
+      </script>
+    <!-- <script>
+        const myForm = document.querySelector('#my-form');
+        const expenseInput = document.querySelector('#expense');
+        const descriptionInput = document.querySelector('#description');
+        const categoryInput = document.querySelector('#category');
+        const listOfExpense = document.querySelector('#listofexpense');
+        
+        
+        myForm.addEventListener('submit', onSubmit);
+           
+        function onSubmit(e){
+          e.preventDefault();       
+          const li = document.createElement('li');
+          const exp=expenseInput.value;
+          const desc=descriptionInput.value;
+          const cat=categoryInput.value;
+          const inputData={
+            exp,
+            cat,
+            desc
+          };
+          axios.post("http://localhost:3000/user/add-expense",inputData)
+            .then((response)=>{
+              console.log(response);
+              showuser(response.data.newExpense);
+            })
+            .catch((err)=>{
+              console.log(err);
+            })
+            expenseInput.value = '';
+            descriptionInput.value='';
+            categoryInput.value = '';  
+        }
+        window.addEventListener("DOMContentLoaded",()=>{
+          axios.get(`http://localhost:3000/user/get-expense`)
+            .then((response)=>{
+              for(let i=0;i<response.data.allExpense.length;i++)
+              {
+                showuser(response.data.allExpense[i])
+              }
+              console.log(response);
+              })
+              .catch((err)=>{console.error(err)});
+        });
+
+        function showuser(obj){
+
+          const parentitem=document.getElementById("listofexpense");
+          const childitem=document.createElement("li");
+          childitem.className="list-group-item"
+          childitem.textContent=obj.amount+" - "+obj.category+" - "+obj.description;
+
+          const deleteitem =document.createElement("input");
+          deleteitem.className="btn btn-danger btn-sm btn-outline-dark float-end";
+          deleteitem.type="button";
+          deleteitem.value="Delete Expense";
+          
+          const edititem =document.createElement("input");
+          edititem.className="btn btn-warning btn-sm btn-outline-dark float-end";
+          edititem.type="button";
+          edititem.value="Edit Expense";
+
+          deleteitem.onclick=()=>{
+            axios.delete(`http://localhost:3000/user/delete-expense/${obj.id}`)
+            .then((response)=>{
+                console.log(response);
+            })
+            .catch((err)=>{
+                console.log(err)
+            });
+              parentitem.removeChild(childitem);
+          }
+          edititem.onclick=()=>{
+            axios.put(`http://localhost:3000/user/edit-expense/${obj.id}`)
+              .then((response)=>{
+                console.log(response);
+              })
+              .catch((err)=>{
+                console.log(err)
+              });
+              parentitem.removeChild(childitem);
+              document.getElementById("expense").value=obj.amount;
+              document.getElementById("category").value=obj.category;
+              document.getElementById("description").value=obj.description; 
+          }
+          childitem.appendChild(edititem);
+          childitem.appendChild(deleteitem);
+          parentitem.appendChild(childitem);
+        }
+    </script> -->
+  </body>
+</html>
