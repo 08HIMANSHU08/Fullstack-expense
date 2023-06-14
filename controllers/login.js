@@ -1,4 +1,5 @@
 const SignUp = require('../models/signup');
+const bcrypt = require('bcrypt');
 
 function isStringEmpty(str){
     if(str==undefined||str.length==0){
@@ -15,25 +16,24 @@ exports.postLogin = async(req,res,next)=>{
         if(isStringEmpty(email)||isStringEmpty(passward)){
             return res.status(400).json({error:"All Fields Are Mandatory"});
         }
-        const users = await SignUp.findAll();
-        // console.log(email,passward);
-        
-        for(let i=0;i<users.length;i++){
-            // console.log(i,users[i]);
-            if(users[i].email==email){
-                if(users[i].passward==passward){
-                    return res.status(200).json({error:"login Complete"});
-                }else{
-                    return res.status(400).json({error:"Password is incorrect"});
+        const users = await SignUp.findAll({where:{email}});
+        if(users.length>0){
+            bcrypt.compare(passward,users[0].passward,(err,result)=>{
+                if(err){
+                    throw new Error("Something Went Wrong");
                 }
-            }
+                if(result===true){
+                    return res.status(200).json({success:true,message:"Login done"});
+                }else{
+                    return res.status(401).json({success:false,message:"Passward Is Incorrect"});
+                }
+            })  
+        }else{
+            return res.status(404).json({success:false,message:"User Not Found"});
         }
-        return res.status(400).json({error:"User Not Found"});
         
     }catch(err){
         console.log(err);
-        res.status(500).json({
-            error:err
-        })
+        res.status(500).json({success:false,message:err})
     }
 }
