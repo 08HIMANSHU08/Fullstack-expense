@@ -16,11 +16,11 @@
             <form id="my-form" class="form-control">
               <div class="form-group">
                 <label for="email" class="text-danger text-center">Enter Email:</label>
-                <input type="email" id="email" class="form-control" >
+                <input type="email" id="email" class="form-control" required  >
               </div>
               <div class="form-group">
                 <label for="passward" class="text-danger text-center">Enter Passward:</label>
-                <input type="password" id="passward" class="form-control">
+                <input type="password" id="passward" class="form-control" required>
               </div>
               <div class="d-flex justify-content-center m-2">
                 <input class="btn btn-primary btn-sm btn-outline-dark btn-c" type="submit" value="Login">
@@ -43,11 +43,11 @@
            
         function onSubmit(e){
           e.preventDefault();       
-          const myemail=emailInput.value;
-          const mypassward=passwardInput.value;
+          const email=emailInput.value;
+          const passward=passwardInput.value;
           const inputData={
-            myemail,
-            mypassward,
+            email,
+            passward,
           };
           console.log(inputData);
           axios.post("http://localhost:3000/user/login",inputData)
@@ -55,10 +55,11 @@
                 console.log(response);
               if(response.status==200){
                 alert("Login Done");
+                window.location.href = "./expenseapp.html";
               }
             })
             .catch((err)=>{
-              document.body.innerHTML+=`<div style="color:red;">${err.response.data.error}<div>`;
+              document.body.innerHTML+=`<div style="color:red;">${err.response.data.message}<div>`;
               console.log(err);
             })
             emailInput.value='';
