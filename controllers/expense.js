@@ -3,7 +3,7 @@ const Expense = require('../models/expensetable');
 
 exports.getExpense = async(req,res,next)=>{
     try{
-        const users = await Expense.findAll();
+        const users = await Expense.findAll({where:{signupId:req.signup.id}});
         console.log(users);
         res.status(200).json({allExpense:users});
     }catch(err){
@@ -17,7 +17,7 @@ exports.postExpense = async(req,res,next)=>{
         const expense = req.body.exp;
         const category = req.body.cat;
         const description = req.body.desc;
-        const data = await Expense.create({amount:expense,description:description,category:category});
+        const data = await Expense.create({amount:expense,description:description,category:category,signupId:req.signup.id});
         console.log(data);
         res.status(201).json({newExpense:data});
     }catch(err){
@@ -35,7 +35,7 @@ exports.deleteExpense = async(req,res,next)=>{
             return res.status(400).json({err:"ID is Missing"})
         }
         const userId = req.params.id;
-        await Expense.destroy({where:{id:userId}});
+        await Expense.destroy({where:{id:userId,signupId:req.signup.id}});
         res.status(200)
     }
     catch(err){
