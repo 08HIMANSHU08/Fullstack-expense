@@ -88,14 +88,14 @@
             descriptionInput.value='';
             categoryInput.value = '';  
         }
+       
         window.addEventListener("DOMContentLoaded",()=>{
-          axios.get(`http://localhost:3000/expense/get-expense`)
+          const token = localStorage.getItem('token');
+          axios.get(`http://localhost:3000/expense/get-expense`,{headers:{"Authorization":token}})
             .then((response)=>{
-              for(let i=0;i<response.data.allExpense.length;i++)
-              {
-                showuser(response.data.allExpense[i])
-              }
-              console.log(response);
+             response.data.allExpense.forEach(expense=>{
+                showuser(expense);
+              })
               })
               .catch((err)=>{console.error(err)});
         });
