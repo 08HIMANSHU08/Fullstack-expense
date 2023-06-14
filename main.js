@@ -13,7 +13,7 @@ const sequelize=require('./util/database');
 var cors = require('cors');
 
 const adminRoutes = require('./routes/admin');
-
+const expenseRoutes = require('./routes/expenseapp');
 const app = express();
 
 app.use(cors());
@@ -26,6 +26,8 @@ app.use(bodyParser.json({extended:false}));
 app.use(express.static(path.join(__dirname,'public')));
 
 app.use('/user',adminRoutes)
+
+app.use('/expense',expenseRoutes);
 
 app.use(errorController.get404)
 
