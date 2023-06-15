@@ -17,6 +17,8 @@ const Expense = require('./models/expensetable');
 
 const adminRoutes = require('./routes/admin');
 const expenseRoutes = require('./routes/expenseapp');
+const purchaseRoutes = require('./routes/purchase');
+const Order = require('./models/order');
 const app = express();
 
 app.use(cors());
@@ -32,10 +34,15 @@ app.use('/user',adminRoutes)
 
 app.use('/expense',expenseRoutes);
 
+app.use('/purchase',purchaseRoutes);
+
 app.use(errorController.get404)
 
 SignUp.hasMany(Expense);
 Expense.belongsTo(SignUp);
+
+SignUp.hasMany(Order);
+Order.belongsTo(SignUp);
 
 sequelize.sync()
 .then(result=>{
