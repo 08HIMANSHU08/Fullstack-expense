@@ -8,7 +8,7 @@ exports.getLeaderBoard = async(req,res,next)=>{
         const userAggregatedExpense = await SignUp.findAll({
             order:[['totalexpense','DESC']],
          });
-        //  console.log("userAggregatedExpense",userAggregatedExpense)
+        //  console.log(userAggregatedExpense)
          res.status(200).json(userAggregatedExpense);
     }catch(err){
         console.log(err);
