@@ -1,18 +1,24 @@
 
 const RazorPay = require('razorpay');
 const Order = require('../models/order');
+const jwt = require('jsonwebtoken');
+ require('dotenv').config();
+
+function generateAccessToken(id,name,ispremiumuser){
+    console.log("purchase",id,name,ispremiumuser)
+    return jwt.sign({signupId:id,name:name,ispremiumuser},process.env.TOKEN_SECRET);
+}
 
 exports.getPurchase = async(req,res,next)=>{
     try{
         var raz = new RazorPay({
-            key_id:'rzp_test_rzkc78bHD4hoGK',
-            key_secret:'b6Z5z2lx7eEW7d3bmCBmur7L',
+            key_id:process.env.RAZORPAY_KEY_ID,
+            key_secret:process.env.RAZORPAY_KEY_SECRET,
         })
         const amount = 25000;
         raz.orders.create({amount,currency:'INR'},(err,order)=>{
             if(err){
-                // throw new Error(JSON.stringify(err));
-                console.log("err")
+                throw new Error(JSON.stringify(err));
             }
             Order.create({orderid:order.id,status:"PENDING"})
             .then(()=>{
@@ -28,20 +34,22 @@ exports.getPurchase = async(req,res,next)=>{
 
 exports.postPurchase = async(req,res,next)=>{
     try{
+        const signupid = req.signup.id;
         const {payment_id,order_id}=req.body;
-        console.log(req.body);
-        Order.findOne({where:{orderid:order_id}})
-        .then(order=>{
-            order.update({paymentid:payment_id,status:"SUCCESSFULL"})
-            .then(()=>{
-                req.signup.update({ispremiumuser:true})
-                .then(()=>{
-                    return res.status(202).json({success:true,message:"Transaction Successfull"});
-                }).catch((err)=>{console.log(err)});
-            }).catch((err)=>{console.log(err)});
-        }).catch((err)=>{console.log(err)});
+        const order=await Order.findOne({where:{orderid:order_id}});
+        const promise1 = order.update({paymentid:payment_id,status:"SUCCESSFULL"});
+        const promise2 = req.signup.update({ispremiumuser:true})
+        Promise.all([promise1,promise2])
+        .then(()=>{
+            return res.status(202).json({success:true,message:"Transaction Successful",token:generateAccessToken(signupid,undefined,true)});
+        })
+        .catch((err)=>{
+            console.log(err);
+            return res.status(403).json({success:false,message:"transaction failed"});
+        })
     }
     catch(err){
-        res.status(500).json({error:err});
+        console.log(err);
+        res.status(403).json({success:false,message:"Something Went Wrong"});
     }
 }
