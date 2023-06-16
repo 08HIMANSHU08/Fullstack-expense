@@ -1,5 +1,6 @@
 const SignUp = require('../models/signup');
 const bcrypt = require('bcrypt');
+const sequelize = require('../util/database');
 
 function isStringEmpty(str){
     if(str==undefined||str.length==0){
@@ -10,6 +11,7 @@ function isStringEmpty(str){
 }
 
 exports.postSignup = async(req,res,next)=>{
+    const t = await sequelize.transaction();
     try{
         const name = req.body.name;
         const email = req.body.email;
@@ -25,10 +27,13 @@ exports.postSignup = async(req,res,next)=>{
         }
         const saltrounds=10;
         bcrypt.hash(passward,saltrounds,async(err,hash)=>{
-            await SignUp.create({name:name,email:email,passward:hash});
+            await SignUp.create({name:name,email:email,passward:hash},{transaction:t});
+            await t.commit();
             res.status(201).json({message:"Successfully created New User",success:true});
         })
+        
     }catch(err){
+        await t.rollback();
         console.log(err);
         res.status(500).json({message:err,success:false})
     }
