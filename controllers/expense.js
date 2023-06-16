@@ -1,51 +1,55 @@
 
 const Expense = require('../models/expensetable');
 const SignUp = require('../models/signup');
+const sequelize = require('../util/database');
 
 exports.getExpense = async(req,res,next)=>{
     try{
-        const users = await Expense.findAll({where:{signupId:req.signup.id}});
-        // console.log(users);
-
-        res.status(200).json({allExpense:users});
+        const users = await Expense.findAll({where:{signupId:req.signup.id}})
+         res.status(200).json({allExpense:users,success:true});
     }catch(err){
         console.log('get user is failed',JSON.stringify(err))
-        res.status(500).json({error:err})
+        res.status(500).json({error:err,success:false})
     }
 }
 
 exports.postExpense = async(req,res,next)=>{
+    const t = await sequelize.transaction();
     try{
         const expense = req.body.exp;
         const category = req.body.cat;
         const description = req.body.desc;
-        const data = await Expense.create({amount:expense,description:description,category:category,signupId:req.signup.id});
-        console.log(data);
+        if(expense==undefined||expense.length===0){
+            return res.status(400).json({success:false,message:"Amount is Mandatory"});
+        }
+        const data = await Expense.create({amount:expense,description:description,category:category,signupId:req.signup.id},{transaction:t});
         const totalexp = Number(req.signup.totalexpense) + Number(expense);
-        await SignUp.update({totalexpense:totalexp},{where:{id:req.signup.id}});
+        await SignUp.update({totalexpense:totalexp},{where:{id:req.signup.id},transaction:t});
+        await t.commit();
         res.status(201).json({newExpense:data});
     }catch(err){
-        console.log(err);
-        res.status(500).json({
-            error:err
-        })
+        await t.rollback();
+        res.status(500).json({success:false,error:err})
     }
 }
 
 exports.deleteExpense = async(req,res,next)=>{
+    const t = await sequelize.transaction();
     try{
         if(req.params.id == 'undefined'){
             console.log("ID is Missing");
-            return res.status(400).json({err:"ID is Missing"})
+            return res.status(400).json({success:false,message:"ID is Missing"})
         }
         const userId = req.params.id;
         const expdata = await Expense.findByPk(userId);
         const totalexp = Number(req.signup.totalexpense) - Number(expdata.amount);
-        await Expense.destroy({where:{id:userId,signupId:req.signup.id}});
-        await SignUp.update({totalexpense:totalexp},{where:{id:req.signup.id}});
-        res.status(200)
+        await SignUp.update({totalexpense:totalexp},{where:{id:req.signup.id}},{transaction:t});
+        await Expense.destroy({where:{id:userId,signupId:req.signup.id}},{transaction:t});
+        await t.commit();
+        res.status(200).json({success:true,message:"Deletion Done"})
     }
     catch(err){
-        res.status(500).json({error:err})
+        await t.rollback();
+        res.status(500).json({success:false,error:err})
     }
 }
