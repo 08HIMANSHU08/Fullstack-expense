@@ -19,6 +19,8 @@ const adminRoutes = require('./routes/admin');
 const expenseRoutes = require('./routes/expenseapp');
 const purchaseRoutes = require('./routes/purchase');
 const premiumFeatureRoutes = require('./routes/premiumfeature');
+const passwardRoutes = require('./routes/forgotpassward');
+
 const Order = require('./models/order');
 const app = express();
 
@@ -38,6 +40,8 @@ app.use('/expense',expenseRoutes);
 app.use('/purchase',purchaseRoutes);
 
 app.use('/premium',premiumFeatureRoutes);
+
+app.use('/passward',passwardRoutes);
 
 app.use(errorController.get404)
 
