@@ -14,6 +14,7 @@ var cors = require('cors');
 
 const SignUp = require('./models/signup');
 const Expense = require('./models/expensetable');
+const ForgotPassward = require('./models/forgetpasswardrequest');
 
 const adminRoutes = require('./routes/admin');
 const expenseRoutes = require('./routes/expenseapp');
@@ -41,7 +42,7 @@ app.use('/purchase',purchaseRoutes);
 
 app.use('/premium',premiumFeatureRoutes);
 
-app.use('/passward',passwardRoutes);
+app.use('/password',passwardRoutes);
 
 app.use(errorController.get404)
 
@@ -50,6 +51,9 @@ Expense.belongsTo(SignUp);
 
 SignUp.hasMany(Order);
 Order.belongsTo(SignUp);
+
+SignUp.hasMany(ForgotPassward);
+ForgotPassward.belongsTo(SignUp);
 
 sequelize.sync()
 .then(result=>{
