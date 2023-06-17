@@ -2,6 +2,58 @@
 const Expense = require('../models/expensetable');
 const SignUp = require('../models/signup');
 const sequelize = require('../util/database');
+const AWS = require('aws-sdk');
+const UrlTable = require('../models/urltable');
+
+function uploadToS3(data,filename){
+    const BUCKET_NAME = 'expensetracking99';
+    const IAM_USER_KEY = 'AKIAWKBL5WP73QZIKEV6';
+    const IAM_USER_SECRET = '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';
+
+    let s3bucket = new AWS.S3({
+        accessKeyId:IAM_USER_KEY,
+        secretAccessKey:IAM_USER_SECRET,
+        // Bucket:BUCKET_NAME,
+    })
+        var params = {
+            Bucket:BUCKET_NAME,
+            Key:filename,
+            Body:data,
+            ACL:'public-read',
+        }
+        return new Promise((resolve,reject)=>{
+            s3bucket.upload(params, (err,s3response)=>{
+                if(err){
+                    console.log("something went worng",err)
+                    reject(err);
+                }else{
+                    // console.log("success",s3response.Location)
+                    resolve(s3response.Location);
+                }
+            })
+        })  
+}
+
+
+exports.downloadExpense = async (req,res,next)=>{
+    try{
+        const signupId = req.signup.id;
+        const expenses = await Expense.findAll({where:{signupId:signupId}});
+        // console.log(expenses);
+        const stringifiedExpense = JSON.stringify(expenses);
+        // console.log(stringifiedExpense);
+        
+        const filename = `Expense${signupId}/${new Date}.txt`;
+        const fileUrl = await uploadToS3(stringifiedExpense,filename);
+        const urls = await UrlTable.create({url:fileUrl,signupId:signupId});
+        const getUrls = await UrlTable.findAll({where:{signupId:signupId}});
+        res.status(200).json({fileUrl,success:true,urls:getUrls})
+    }catch(err){
+        console.log(err);
+        res.status(500).json({fileUrl:'',success:false,err:err})
+    }
+}
+
 
 exports.getExpense = async(req,res,next)=>{
     try{
@@ -53,3 +105,5 @@ exports.deleteExpense = async(req,res,next)=>{
         res.status(500).json({success:false,error:err})
     }
 }
+
+
