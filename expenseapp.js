@@ -42,20 +42,39 @@ function parseJwt (token) {
 function showPremiumFeature(){
   document.getElementById("razorpayBuy").style.visibility="hidden";
   document.getElementById("message").innerHTML="Premium User";
-  showReport();
-}
-function showReport(){
-  const report = document.createElement("input");
-  report.className="btn btn-sm btn-outline-dark float-end";
-  report.type="button";
-  report.value="Download Report";
-  document.getElementById('message').appendChild(report);
-  report.onclick=async function(e){
-    e.preventDefault();
-    window.location.href="./report.html";
-  }
 }
 
+function download(){
+  const token = localStorage.getItem('token');
+  axios.get('http://localhost:3000/user/download', { headers: {"Authorization" : token} })
+  .then((response) => {
+    console.log(response.data.urls)
+      showUrls(response.data.urls);
+      if(response.status === 200){
+          //the bcakend is essentially sending a download link
+          //  which if we open in browser, the file would download
+          var a = document.createElement("a");
+          a.href = response.data.fileUrl;
+          a.download = 'myexpense.csv';
+          a.click();
+      } else {
+          throw new Error(response.data.message)
+      }
+
+  })
+  .catch((err) => {
+    console.log(err)
+    document.body.innerHTML+=`<div style="color:red;">${err.response.data.err.message}<div>`;
+  });
+}
+
+function showUrls(urls){
+  let urlElement = document.getElementById('dataurls');
+  urlElement.innerHTML+="<h1>URLS</h1>";
+  urls.forEach(url=>{
+    urlElement.innerHTML+=`<li>URL= ${url.url} `;
+  })
+}
 function showleaderBoard(){
   const leaderBoard = document.createElement("input");
   leaderBoard.className="btn btn-sm btn-outline-dark float-end";
@@ -84,6 +103,9 @@ function showleaderBoard(){
   {
     showPremiumFeature();
     showleaderBoard();
+    // showUrls()
+  }else{
+    document.getElementById("downloadexpense").style.visibility="hidden";
   }
   axios.get(`http://localhost:3000/expense/get-expense`,{headers:{"Authorization":token}})
     .then((response)=>{
