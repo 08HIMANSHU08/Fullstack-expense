@@ -4,7 +4,10 @@ const path = require('path');
 
 const express = require('express');
 const fs = require('fs');
+ // "start:dev": "nodemon main.js"
 
+ require('dotenv').config();
+ 
 const bodyParser = require('body-parser');
 const sequelize=require('./util/database');
 const helmet = require('helmet');
@@ -24,7 +27,7 @@ const expenseRoutes = require('./routes/expenseapp');
 const purchaseRoutes = require('./routes/purchase');
 const premiumFeatureRoutes = require('./routes/premiumfeature');
 const passwardRoutes = require('./routes/forgotpassward');
-require('dotenv').config();
+
 
 
 const Order = require('./models/order');
