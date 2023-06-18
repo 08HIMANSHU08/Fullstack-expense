@@ -108,13 +108,25 @@ function showleaderBoard(){
   }else{
     document.getElementById("downloadexpense").style.visibility="hidden";
   }
-  axios.get(`http://localhost:3000/expense/get-expense/page=${page}`,{headers:{"Authorization":token}})
+  let rows=localStorage.getItem('rows')||3;
+  axios.get(`http://localhost:3000/expense/get-expense/page=${page}/rows=${rows}`,{headers:{"Authorization":token}})
     .then((response)=>{
       showuser(response.data.allExpense);
       showPagination(response.data);
     })
       .catch((err)=>{console.error(err)});
 });
+
+  // ajkhsfieyrgvnejjichhhhr for number of otems in row
+  let rows;
+  const token = localStorage.getItem('token');
+  document.getElementById('rowsclick').onclick=function(){
+    rows = Number(document.getElementById('paginationnumber').value);
+
+  console.log("sjdgfwe",rows)
+  localStorage.setItem("rows",rows);
+}
+
 
 function showPagination({
   currentPage,
@@ -125,6 +137,7 @@ function showPagination({
   lastPage,
 }){
   pagination.innerHTML = "";
+  
   if(hasPreviousPage){
     const btn2 = document.createElement('button');
     btn2.innerHTML = previousPage;
@@ -145,10 +158,12 @@ function showPagination({
 }
 
 function getExpense(page){
+  let rows = localStorage.getItem('rows');
+  const token = localStorage.getItem('token');
   console.log(page);
-  axios.get(`http://localhost:3000/expense/get-expense/page=${page}`)
+  axios.get(`http://localhost:3000/expense/get-expense/page=${page}/rows=${rows}`,{headers:{"Authorization":token}})
   .then((response)=>{
-    console.log("page2",response);
+    console.log("page2",response.data);
     showuser(response.data.allExpense);
     showPagination(response.data);
   })
