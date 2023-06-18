@@ -5,6 +5,7 @@ const sequelize = require('../util/database');
 const AWS = require('aws-sdk');
 const UrlTable = require('../models/urltable');
 
+
 function uploadToS3(data,filename){
     const BUCKET_NAME = 'expensetracking99';
     const IAM_USER_KEY = 'AKIAWKBL5WP73QZIKEV6';
@@ -54,11 +55,34 @@ exports.downloadExpense = async (req,res,next)=>{
     }
 }
 
-
+// const ITEM_PER_PAGE = 3;
 exports.getExpense = async(req,res,next)=>{
     try{
-        const users = await Expense.findAll({where:{signupId:req.signup.id}})
-         res.status(200).json({allExpense:users,success:true});
+        
+        
+        const page =Number (req.params.page||1);
+        console.log(page,"page number");
+        const rows =Number(req.params.rows);
+        console.log(rows,"Rows pre page");
+        let totaItems;
+        const total = await Expense.count();
+        totaItems = total;
+        // console.log(totaItems);
+        const users = await Expense.findAll({
+            offset:(page-1)*rows,
+            limit:rows,
+        },{where:{signupId:req.signup.id}})
+        console.log(users)
+         res.status(200).json({
+            allExpense:users,
+            currentPage:page,hasNextPage:(rows*page)<totaItems,
+            nextPage:(page+1),
+            hasPreviousPage:(page>1),
+            previousPage:(page-1),
+            lastPage:(Math.ceil(totaItems/rows)),
+            // token:generateAccessToken(req.signup.id,undefined,true),
+            success:true
+        });
     }catch(err){
         console.log('get user is failed',JSON.stringify(err))
         res.status(500).json({error:err,success:false})
